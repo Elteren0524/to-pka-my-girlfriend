@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>girlfriend?</title>
+
+  <!-- Sci-fi font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    :root{
+      --bg1:#020617;
+      --bg2:#071a38;
+
+      --neon:#39b7ff;
+      --neon2:#78e6ff;
+      --ink:#dff6ff;
+
+      --line: rgba(57,183,255,.55);
+      --lineSoft: rgba(57,183,255,.18);
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(1000px 650px at 50% 18%, rgba(70,170,255,.15) 0%, rgba(0,0,0,0) 55%),
+        linear-gradient(var(--bg1), var(--bg2));
+      font-family: "Orbitron", system-ui, Arial, sans-serif;
+      color:var(--ink);
+      overflow:hidden;
+    }
+
+    .wrap{
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+    }
+
+    .card{
+      position:relative;
+      width:min(980px, 92vw);
+      height:min(560px, 82vh);
+      border-radius:28px;
+      background: linear-gradient(180deg, rgba(8,33,64,.96), rgba(6,22,44,.96));
+      overflow:hidden;
+
+      /* neon outer glow */
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.03) inset,
+        0 0 0 1px rgba(57,183,255,.14),
+        0 0 22px rgba(57,183,255,.18),
+        0 0 65px rgba(0,0,0,.70);
+    }
+
+    /* neon inner frame */
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:14px;
+      border-radius:22px;
+      border:1px solid rgba(120,230,255,.55);
+      box-shadow:
+        0 0 0 1px rgba(57,183,255,.18) inset,
+        0 0 18px rgba(57,183,255,.28),
+        0 0 38px rgba(57,183,255,.18);
+      pointer-events:none;
+      z-index:1;
+    }
+
+    /* corner highlights */
+    .card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:1;
+      background:
+        radial-gradient(420px 240px at 18% 12%, rgba(120,230,255,.14), rgba(0,0,0,0) 70%),
+        radial-gradient(380px 220px at 82% 18%, rgba(57,183,255,.10), rgba(0,0,0,0) 70%);
+    }
+
+    /* subtle HUD scanlines */
+    .hud{
+      position:absolute;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      opacity:.35;
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,.06) 1px, rgba(0,0,0,0) 1px);
+      background-size: 100% 34px;
+      mask-image: radial-gradient(closest-side at 50% 50%, rgba(0,0,0,1), rgba(0,0,0,.55));
+    }
+
+    /* confetti overlay on the card */
+    #confetti{
+      position:absolute;
+      inset:0;
+      z-index:4;
+      pointer-events:none;
+    }
+
+    .content{
+      position:relative;
+      z-index:2;
+      height:100%;
+      padding:64px 72px;
+      text-align:center;
+    }
+
+    #title{
+      margin:0;
+      font-size:clamp(34px, 4.2vw, 56px);
+      font-weight:800;
+      letter-spacing:1px;
+      text-shadow:
+        0 0 14px rgba(57,183,255,.25),
+        0 0 34px rgba(57,183,255,.16);
+    }
+
+    .hint{
+      margin:16px 0 0;
+      opacity:.9;
+      font-size:14px;
+      letter-spacing:.6px;
+      text-transform:uppercase;
+    }
+
+    /* No only moves in this region */
+    .playground{
+      position:relative;
+      width:100%;
+      height:230px;
+      margin-top:26px;
+    }
+
+    .btn{
+      width:150px;
+      height:54px;
+      border:none;
+      border-radius:999px;
+      font-size:16px;
+      letter-spacing:.8px;
+      color:#fff;
+      cursor:pointer;
+      user-select:none;
+      position:absolute;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      box-shadow:
+        0 10px 28px rgba(0,0,0,.35),
+        0 0 0 1px rgba(255,255,255,.10) inset;
+    }
+
+    .yes{
+      background: linear-gradient(180deg, #2fb3ff 0%, #2487ff 100%);
+      box-shadow:
+        0 12px 30px rgba(0,0,0,.35),
+        0 0 0 1px rgba(255,255,255,.14) inset,
+        0 0 18px rgba(57,183,255,.28);
+    }
+
+    .no{
+      background:linear-gradient(90deg,#a855f7,#9333ea);
+      will-change:left, top;
+    }
+
+    .btn:hover{ filter: brightness(1.05); }
+
+    .bubble{
+      position:absolute;
+      z-index:5;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:11px;
+      letter-spacing:.5px;
+      text-transform:uppercase;
+      background:rgba(9, 26, 50, .55);
+      border:1px solid rgba(120,230,255,.22);
+      box-shadow:
+        0 0 18px rgba(57,183,255,.18),
+        0 0 0 1px rgba(57,183,255,.10) inset;
+      backdrop-filter: blur(8px);
+      opacity:0;
+      transform:translateY(6px) scale(.98);
+      pointer-events:none;
+      transition:opacity .15s ease, transform .15s ease;
+      white-space:nowrap;
+    }
+    .bubble.show{
+      opacity:1;
+      transform:translateY(0) scale(1);
+    }
+
+    /* results */
+    .resultWrap{
+      display:none;
+      margin-top:22px;
+    }
+
+    .resultText{
+      font-weight:900;
+      font-size:clamp(64px, 8vw, 110px);
+      letter-spacing:2px;
+      margin-top:10px;
+      text-shadow:
+        0 0 18px rgba(120,230,255,.55),
+        0 0 44px rgba(120,230,255,.40),
+        0 0 86px rgba(57,183,255,.25);
+      animation: glowPulse 1.2s infinite;
+    }
+
+    .subText{
+      margin-top:14px;
+      font-size:14px;
+      letter-spacing:.6px;
+      text-transform:uppercase;
+      opacity:.92;
+    }
+
+    @keyframes glowPulse{
+      0%{
+        transform:scale(1);
+        text-shadow:
+          0 0 18px rgba(120,230,255,.55),
+          0 0 44px rgba(120,230,255,.38);
+      }
+      50%{
+        transform:scale(1.06);
+        text-shadow:
+          0 0 30px rgba(160,245,255,.75),
+          0 0 88px rgba(160,245,255,.55);
+      }
+      100%{
+        transform:scale(1);
+        text-shadow:
+          0 0 18px rgba(120,230,255,.55),
+          0 0 44px rgba(120,230,255,.38);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card" id="card">
+      <canvas id="confetti"></canvas>
+      <div class="hud"></div>
+
+      <div class="content" id="content">
+        <h1 id="title">Pka, will you be my Girlfriend?</h1>
+        <p id="hint" class="hint">Choose wisely...</p>
+
+        <div id="playground" class="playground">
+          <button id="yes" class="btn yes" type="button">Yes</button>
+          <button id="no" class="btn no" type="button">No</button>
+          <div id="bubble" class="bubble" aria-hidden="true"></div>
+        </div>
+
+        <div id="resultWrap" class="resultWrap">
+          <div id="result" class="resultText">YAYYYY!!</div>
+          <div id="sub" class="subText">I knew you'd say yes 💖</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const card = document.getElementById("card");
+    const playground = document.getElementById("playground");
+    const yes = document.getElementById("yes");
+    const no = document.getElementById("no");
+    const hint = document.getElementById("hint");
+    const resultWrap = document.getElementById("resultWrap");
+    const bubble = document.getElementById("bubble");
+
+    const GAP = 70;
+
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+    function setInitialPositions() {
+      const w = playground.clientWidth;
+      const h = playground.clientHeight;
+      const btnW = yes.offsetWidth;
+      const btnH = yes.offsetHeight;
+
+      const centerX = w / 2;
+      const y = (h / 2) - (btnH / 2);
+
+      const yesX = centerX - (GAP / 2) - btnW;
+      const noX  = centerX + (GAP / 2);
+
+      yes.style.left = `${clamp(yesX, 12, w - btnW - 12)}px`;
+      yes.style.top  = `${clamp(y,    12, h - btnH - 12)}px`;
+
+      no.style.left  = `${clamp(noX,  12, w - btnW - 12)}px`;
+      no.style.top   = `${clamp(y,    12, h - btnH - 12)}px`;
+    }
+
+    window.addEventListener("load", () => requestAnimationFrame(setInitialPositions));
+    window.addEventListener("resize", () => {
+      setInitialPositions();
+      resizeCanvas();
+    });
+
+    function rectsOverlap(a, b) {
+      return !(
+        a.right  <= b.left  ||
+        a.left   >= b.right ||
+        a.bottom <= b.top   ||
+        a.top    >= b.bottom
+      );
+    }
+
+    const bubbleTexts = ["hehe","nice try","not happening","nope","try again","almost…","no way"];
+    let bubbleTimer = null;
+
+    function showBubbleNearNo() {
+      const msg = bubbleTexts[Math.floor(Math.random() * bubbleTexts.length)];
+      bubble.textContent = msg;
+
+      const pgW = playground.clientWidth;
+      const pgH = playground.clientHeight;
+
+      const noLeft = parseFloat(no.style.left || "0");
+      const noTop  = parseFloat(no.style.top  || "0");
+
+      // stick close to No (above-left)
+      let bx = noLeft - 10;
+      let by = noTop  - 34;
+
+      bubble.classList.add("show");
+      const bw = bubble.offsetWidth;
+      const bh = bubble.offsetHeight;
+
+      bx = clamp(bx, 8, pgW - bw - 8);
+      by = clamp(by, 8, pgH - bh - 8);
+
+      bubble.style.left = `${bx}px`;
+      bubble.style.top  = `${by}px`;
+
+      if (bubbleTimer) clearTimeout(bubbleTimer);
+      bubbleTimer = setTimeout(() => bubble.classList.remove("show"), 650);
+    }
+
+    function moveNo() {
+      const pad = 14;
+      const safe = 20;
+
+      const w = playground.clientWidth;
+      const h = playground.clientHeight;
+      const btnW = no.offsetWidth;
+      const btnH = no.offsetHeight;
+
+      const yesRectAbs = yes.getBoundingClientRect();
+      const pgRectAbs = playground.getBoundingClientRect();
+
+      const yesRect = {
+        left:   (yesRectAbs.left - pgRectAbs.left) - safe,
+        top:    (yesRectAbs.top  - pgRectAbs.top)  - safe,
+        right:  (yesRectAbs.right- pgRectAbs.left) + safe,
+        bottom: (yesRectAbs.bottom- pgRectAbs.top) + safe
+      };
+
+      const minX = pad;
+      const maxX = w - btnW - pad;
+      const minY = pad;
+      const maxY = h - btnH - pad;
+
+      let x = minX, y = minY;
+      let tries = 0;
+
+      while (tries < 120) {
+        x = minX + Math.random() * Math.max(0, maxX - minX);
+        y = minY + Math.random() * Math.max(0, maxY - minY);
+
+        const noRect = { left:x, top:y, right:x+btnW, bottom:y+btnH };
+        if (!rectsOverlap(noRect, yesRect)) break;
+        tries++;
+      }
+
+      no.style.transition = "left 140ms ease-out, top 140ms ease-out";
+      no.style.left = `${x}px`;
+      no.style.top  = `${y}px`;
+
+      showBubbleNearNo();
+    }
+
+    no.addEventListener("mouseenter", moveNo);
+    no.addEventListener("click", moveNo);
+
+    yes.addEventListener("click", () => {
+      hint.style.display = "none";
+      playground.style.display = "none";
+      resultWrap.style.display = "block";
+      startConfetti();
+    });
+
+    /* confetti on the card */
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+    let pieces = [];
+    let raf = null;
+
+    function resizeCanvas() {
+      canvas.width = card.clientWidth;
+      canvas.height = card.clientHeight;
+    }
+    resizeCanvas();
+
+    function startConfetti() {
+      if (raf) cancelAnimationFrame(raf);
+      resizeCanvas();
+
+      pieces = [];
+      const W = canvas.width;
+      const H = canvas.height;
+
+      for (let i = 0; i < 220; i++) {
+        pieces.push({
+          x: Math.random() * W,
+          y: -Math.random() * (H * 0.8),
+          size: Math.random() * 7 + 4,
+          speed: Math.random() * 3.5 + 2,
+          drift: Math.random() * 1.8 - 0.9,
+          color: `hsl(${Math.random() * 360}, 100%, 60%)`
+        });
+      }
+      animate();
+    }
+
+    function animate() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx.clearRect(0, 0, W, H);
+
+      for (const p of pieces) {
+        p.y += p.speed;
+        p.x += p.drift;
+
+        if (p.x < -20) p.x = W + 20;
+        if (p.x > W + 20) p.x = -20;
+
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+      }
+
+      pieces = pieces.filter(p => p.y < H + 40);
+
+      if (pieces.length) raf = requestAnimationFrame(animate);
+      else ctx.clearRect(0, 0, W, H);
+    }
+  </script>
+</body>
+</html>
